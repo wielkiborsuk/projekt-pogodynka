@@ -6,7 +6,7 @@ import com.sda.pogodynka.model.Weather;
 import java.util.List;
 import java.util.Random;
 
-public class RandomForecast {
+public class RandomForecastProvider {
 
     List<String> DESCRIPTIONS = List.of("Sunny", "Rainy", "Windy");
     List<String> DIRECTIONS = List.of("North", "South", "East", "West");

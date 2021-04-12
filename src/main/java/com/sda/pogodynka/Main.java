@@ -1,6 +1,6 @@
 package com.sda.pogodynka;
 
-import com.sda.pogodynka.forecast.RandomForecast;
+import com.sda.pogodynka.forecast.WeatherstackForecastProvider;
 import com.sda.pogodynka.model.Location;
 import com.sda.pogodynka.model.Weather;
 
@@ -17,7 +17,7 @@ public class Main {
 
         System.out.println("We'll present random forecast for Rzeszów");
 
-        RandomForecast forecastService = new RandomForecast();
+        WeatherstackForecastProvider forecastService = new WeatherstackForecastProvider();
         Weather forecast = forecastService.getForecast(rzeszow);
 
         System.out.printf("In %s it's %.1f degrees and %s",
