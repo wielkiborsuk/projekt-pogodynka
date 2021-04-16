@@ -4,27 +4,39 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sda.pogodynka.model.Location;
 import com.sda.pogodynka.model.Weather;
+import org.apache.http.client.fluent.Request;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class WeatherstackForecastProvider {
     Gson gson = new Gson();
+    private static final String WEATHERSTACK_URL = "http://api.weatherstack.com/current?access_key=%s&query=%s";
+    private static String ACCESS_KEY = "";
 
     public Weather getForecast(Location location) {
         String response = getForecastResponse(location);
         return decodeWeatherstackJson(response);
     }
 
+    private String getAccessKey() {
+        if (ACCESS_KEY.isBlank()) {
+            try {
+                ACCESS_KEY = Files.readString(Path.of("weatherstack.key"));
+            } catch (IOException e) {
+                throw new RuntimeException("resources are not in place!! (API key)");
+            }
+        }
+        return ACCESS_KEY;
+    }
+
     private String getForecastResponse(Location location) {
         try {
-            Path responseFile = Paths.get(ClassLoader.getSystemResource("static_response.json").toURI());
-            return Files.readString(responseFile);
-        } catch (IOException | URISyntaxException e) {
-            throw new RuntimeException("resources are not in place!!");
+            String query = String.format("%f,%f", location.getLat(), location.getLon());
+            return Request.Get(String.format(WEATHERSTACK_URL, getAccessKey(), query)).execute().returnContent().asString();
+        } catch (IOException e) {
+            throw new RuntimeException("resources are not in place!! (static json)");
         }
     }
 
@@ -40,14 +52,6 @@ public class WeatherstackForecastProvider {
         Double windSp = current.get("wind_speed").getAsDouble();
 
 
-        Weather forecast = new Weather();
-        forecast.setDescription(desc);
-        forecast.setTemperature(temp);
-        forecast.setHumidity(hum);
-        forecast.setPressure(pres);
-        forecast.setWindDirection(windDir);
-        forecast.setWindSpeed(windSp);
-
-        return forecast;
+        return new Weather(temp, pres, hum, windSp, windDir, desc);
     }
 }
